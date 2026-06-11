@@ -1,0 +1,68 @@
+{#
+  Одно замечание. Рендерится в двух местах: в списке отчёта (_job_fragment.html)
+  и как htmx-ответ роутов триажа/добавления (тогда контекст = {f, g, request}).
+  f — ORM-Finding; g — цитата ГОСТ (dict|None); request — для CSRF-токена.
+#}
+{% if f.source == 'manual' %}
+<li id="finding-{{ f.id }}" class="finding severity-{{ f.severity }}-border is-manual">
+  <div class="finding-top">
+    <span class="badge badge-manual">вручную</span>
+    <span class="badge severity-{{ f.severity }}">{{ f.severity }}</span>
+    {% if f.rule_code %}
+    <a class="gost-link" href="/gost/{{ f.rule_code.replace('ГОСТ ', '').strip() }}" target="_blank"
+       title="Открыть PDF стандарта">{{ f.rule_code }}</a>
+    {% endif %}
+  </div>
+  <div class="finding-msg">{{ f.message }}</div>
+  <div class="finding-foot">
+    <span class="muted small">Добавлено нормоконтролёром · пропущено ИИ</span>
+    <form class="triage-actions" hx-post="/findings/{{ f.id }}/delete"
+          hx-target="#finding-{{ f.id }}" hx-swap="outerHTML"
+          hx-confirm="Удалить это замечание?">
+      <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+      <button class="triage-btn dismiss" type="submit">Удалить</button>
+    </form>
+  </div>
+</li>
+{% else %}
+<li id="finding-{{ f.id }}"
+    class="finding severity-{{ f.severity }}-border{% if f.status == 'dismissed' %} is-dismissed{% elif f.status == 'accepted' %} is-accepted{% endif %}">
+  <div class="finding-top">
+    <span class="badge severity-{{ f.severity }}">{{ f.severity }}</span>
+    <a class="gost-link" href="/gost/{{ f.rule_code.replace('ГОСТ ', '') }}" target="_blank"
+       title="Открыть PDF стандарта">{{ f.rule_code }} {{ f.rule_clause }}</a>
+  </div>
+  <div class="finding-msg">{{ f.message }}</div>
+  {% if f.fix %}<div class="finding-fix"><span class="fix-label">Как исправить:</span> {{ f.fix }}</div>{% endif %}
+  {% if g %}
+  <details class="finding-gost">
+    <summary>Что говорит ГОСТ</summary>
+    <blockquote class="gost-quote">{{ g.quote }}</blockquote>
+    <div class="muted small">Цитата из базы ГОСТ (OCR) ·
+      <a class="gost-link" href="/gost/{{ f.rule_code.replace('ГОСТ ', '') }}" target="_blank">сверить с PDF</a>
+    </div>
+  </details>
+  {% endif %}
+  <div class="finding-foot">
+    <span class="muted small">
+      {{ f.rule_title }}{% if f.handle %} · примитив {{ f.handle }}{% endif %}
+    </span>
+    <form class="triage-actions" hx-post="/findings/{{ f.id }}/status"
+          hx-target="#finding-{{ f.id }}" hx-swap="outerHTML">
+      <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+      {% if f.status == 'open' %}
+      <button class="triage-btn accept" type="submit" name="status" value="accepted"
+              title="Замечание верное">Подтвердить</button>
+      <button class="triage-btn dismiss" type="submit" name="status" value="dismissed"
+              title="Ложное срабатывание ИИ">Ложное</button>
+      {% else %}
+      <span class="triage-state {{ f.status }}">
+        {% if f.status == 'accepted' %}Подтверждено{% else %}Отмечено ложным{% endif %}
+      </span>
+      <button class="triage-btn reset" type="submit" name="status" value="open"
+              title="Вернуть в работу">Вернуть</button>
+      {% endif %}
+    </form>
+  </div>
+</li>
+{% endif %}

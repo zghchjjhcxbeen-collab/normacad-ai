@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}NormaCAD AI{% endblock %}</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script>(function(){try{var t=localStorage.getItem('ncad-theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+  <script src="https://unpkg.com/htmx.org@2.0.3" defer></script>
+</head>
+{% from "_icons.html" import icon %}
+{% set p = request.url.path %}
+{% set org_labels = {'individual': 'Частный пользователь', 'bureau': 'Конструкторское бюро', 'enterprise': 'Предприятие'} %}
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="sidebar-brand" href="/dashboard">
+        <span class="logo">N</span><span class="brand-text">NormaCAD <span class="brand-ai">AI</span></span>
+      </a>
+
+      <a class="sidebar-cta" href="/chat/new">
+        {{ icon('edit', size=18) }}<span class="cta-label">Новый чат</span>
+      </a>
+
+      <a class="nav-item {{ 'active' if p.startswith('/chats') }}" href="/chats">
+        {{ icon('search', cls='nav-ic') }}<span class="nav-label">Поиск чатов</span>
+      </a>
+      <a class="nav-item {{ 'active' if p.startswith('/check') or p.startswith('/jobs') }}" href="/check">
+        {{ icon('check', cls='nav-ic') }}<span class="nav-label">Проверка чертежа</span>
+      </a>
+      <a class="nav-item {{ 'active' if p.startswith('/chat') and not p.startswith('/chats') }}" href="/chat">
+        {{ icon('chat', cls='nav-ic') }}<span class="nav-label">Чат с ИИ</span>
+      </a>
+      <a class="nav-item {{ 'active' if p == '/dashboard' or p == '/' }}" href="/dashboard">
+        {{ icon('home', cls='nav-ic') }}<span class="nav-label">Главная</span>
+      </a>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-head">
+          <span>Проекты</span>
+          <a href="/check" title="Загрузить чертёж">{{ icon('plus', size=16) }}</a>
+        </div>
+        <div class="sidebar-empty">У вас пока нет проектов.<br><a href="/check">Загрузить чертёж →</a></div>
+      </div>
+
+      <div class="sidebar-spacer"></div>
+
+      <div class="sidebar-foot">
+        <div class="sidebar-note">Предварительный нормоконтроль по ЕСКД. Не заменяет нормоконтролёра.</div>
+        <div class="sidebar-user">
+          <span class="avatar">{{ user.email[:2] | upper }}</span>
+          <span class="su-text">
+            <span class="su-name">{{ user.email.split('@')[0] }}</span>
+            <span class="su-sub">{{ org_labels.get(user.org_type, 'Пользователь') }}</span>
+          </span>
+          <form method="post" action="/logout" class="inline">
+            <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+            <button class="su-more" type="submit" title="Выйти" aria-label="Выйти"
+                    style="background:none;border:none;cursor:pointer;color:inherit;padding:0;line-height:0">
+              {{ icon('logout', size=17) }}
+            </button>
+          </form>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <div class="topbar-title">{% block page_title %}{% endblock %}</div>
+        <div class="topbar-actions">
+          <div class="theme-toggle">
+            <button class="theme-btn" data-set-theme="light" title="Светлая тема" aria-label="Светлая тема">{{ icon('sun', size=16) }}</button>
+            <button class="theme-btn" data-set-theme="dark" title="Тёмная тема" aria-label="Тёмная тема">{{ icon('moon', size=16) }}</button>
+          </div>
+          {% block topbar_action %}{% endblock %}
+        </div>
+      </header>
+      <main class="content">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      function apply(t) {
+        document.documentElement.setAttribute('data-theme', t);
+        try { localStorage.setItem('ncad-theme', t); } catch (e) {}
+        document.querySelectorAll('.theme-btn').forEach(function (b) {
+          b.classList.toggle('active', b.dataset.setTheme === t);
+        });
+      }
+      document.querySelectorAll('.theme-btn').forEach(function (b) {
+        b.addEventListener('click', function () { apply(b.dataset.setTheme); });
+      });
+      apply(document.documentElement.getAttribute('data-theme') || 'dark');
+    })();
+  </script>
+</body>
+</html>

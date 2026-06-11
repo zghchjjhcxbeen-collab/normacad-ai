@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}NormaCAD AI{% endblock %}</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script>(function(){try{var t=localStorage.getItem('ncad-theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body class="auth-body">
+  <div class="auth-wrap">
+    <div class="auth-brand"><span class="logo">N</span> NormaCAD <span class="brand-ai">AI</span></div>
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>

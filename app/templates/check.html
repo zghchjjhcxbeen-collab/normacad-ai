@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Проверка чертежа — NormaCAD AI{% endblock %}
+{% block page_title %}Проверка чертежа{% endblock %}
+{% block topbar_action %}
+<a class="btn btn-ghost btn-sm" href="/chat">{{ icon('chat', size=16) }} Обсудить с ИИ</a>
+{% endblock %}
+{% block content %}
+<div class="page-head" style="text-align:center">
+  <h1>Загрузите чертёж для проверки</h1>
+  <p style="margin:0 auto">Файл будет проверен по ГОСТ и ЕСКД. По итогам вы получите отчёт о нарушениях.</p>
+</div>
+
+{% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+
+<form id="upload-form" method="post" action="/uploads" enctype="multipart/form-data">
+  <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+  <input id="file-input" type="file" name="file" accept=".dxf,.pdf" hidden>
+  <div id="dropzone" class="dropzone" role="button" tabindex="0">
+    <div class="dz-icon">{{ icon('upload', size=26) }}</div>
+    <div class="dz-title">Перетащите файл сюда</div>
+    <div class="dz-sub">или нажмите, чтобы выбрать · PDF, DXF · до 50 МБ</div>
+    <div id="dz-file" class="dz-file"></div>
+  </div>
+</form>
+
+<div style="text-align:center;margin-top:18px">
+  <a class="btn btn-ghost" href="/dashboard">{{ icon('arrow-right', size=16) }} К моим проверкам</a>
+</div>
+
+<p class="muted small" style="text-align:center;margin-top:14px">
+  DXF и вектор-PDF проверяются с высокой точностью. Сканы и DWG — в разработке.
+</p>
+
+<script>
+  (function () {
+    var form = document.getElementById('upload-form');
+    var input = document.getElementById('file-input');
+    var zone = document.getElementById('dropzone');
+    var fileLabel = document.getElementById('dz-file');
+    if (!form || !input || !zone) return;
+    function submit() {
+      if (!input.files.length) return;
+      if (fileLabel) fileLabel.textContent = 'Загрузка: ' + input.files[0].name + '…';
+      form.submit();
+    }
+    zone.addEventListener('click', function () { input.click(); });
+    zone.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); } });
+    input.addEventListener('change', submit);
+    ['dragenter', 'dragover'].forEach(function (ev) {
+      zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.add('drag'); });
+    });
+    ['dragleave', 'dragend'].forEach(function (ev) {
+      zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.remove('drag'); });
+    });
+    zone.addEventListener('drop', function (e) {
+      e.preventDefault(); zone.classList.remove('drag');
+      if (e.dataTransfer && e.dataTransfer.files.length) { input.files = e.dataTransfer.files; submit(); }
+    });
+  })();
+</script>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% if job.status in ['queued', 'running'] %}
+<div id="job-view"
+     hx-get="/jobs/{{ job.id }}/fragment"
+     hx-trigger="every 2s"
+     hx-swap="outerHTML"
+     class="card processing">
+  <div class="spinner"></div>
+  <p class="muted">Идёт проверка… (статус: {{ job.status }})</p>
+</div>
+
+{% elif job.status == 'failed' %}
+<div id="job-view" class="card alert-error">
+  <h3>Не удалось обработать файл</h3>
+  <p>{{ job.error_text }}</p>
+  <a class="btn btn-ghost" href="/dashboard">К кабинету</a>
+</div>
+
+{% else %}
+<div id="job-view" class="report">
+  <div class="report-head card">
+    <div class="summary">
+      <h2>Отчёт</h2>
+      <p>{{ report.summary }}</p>
+    </div>
+    <div class="counts">
+      {% set c = report.counts_by_severity %}
+      <span class="badge severity-critical">ошибки: {{ c.get('critical', 0) }}</span>
+      <span class="badge severity-major">серьёзные: {{ c.get('major', 0) }}</span>
+      <span class="badge severity-minor">мелкие: {{ c.get('minor', 0) }}</span>
+      <span class="muted small">ruleset {{ report.ruleset_version }}</span>
+    </div>
+  </div>
+
+  {% for w in warnings %}<div class="alert alert-warn">{{ w }}</div>{% endfor %}
+
+  <div class="grid-2">
+    <div class="card viewer">
+      <h3>Чертёж с подсветкой</h3>
+      {{ svg | safe }}
+      <p class="muted small">Красным выделены места замечаний. Наведите курсор — увидите пункт ГОСТ.</p>
+    </div>
+
+    <div class="card findings">
+      <h3>Замечания ИИ ({{ findings | length }})</h3>
+      {% if findings %}
+      <ul class="finding-list">
+        {% for f in findings %}
+          {% set g = (groundings or {}).get(f.rule_code) %}
+          {% include "_finding.html" %}
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="ok-msg">Замечаний не найдено по проверкам Этапа 0.</p>
+      {% endif %}
+
+      <div class="manual-feedback">
+        <h4>Обратная связь нормоконтролёра</h4>
+        <p class="muted small">Отметьте ложные срабатывания (кнопка «Ложное» у замечаний) и добавьте
+          то, что ИИ пропустил. Это калибрует точность до появления реального корпуса.</p>
+        <ul class="finding-list" id="manual-list">
+          {% for f in manual_findings %}
+            {% set g = None %}
+            {% include "_finding.html" %}
+          {% endfor %}
+        </ul>
+        <form class="manual-form" hx-post="/reports/{{ report.id }}/manual-finding"
+              hx-target="#manual-list" hx-swap="beforeend"
+              hx-on::after-request="if(event.detail.successful) this.reset()">
+          <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+          <div class="manual-row">
+            <select name="severity" aria-label="Важность замечания">
+              <option value="critical">ошибка</option>
+              <option value="major" selected>серьёзное</option>
+              <option value="minor">мелкое</option>
+              <option value="info">рекомендация</option>
+            </select>
+            <input type="text" name="rule_code" maxlength="64"
+                   placeholder="ГОСТ — необязательно, напр. 2.305">
+          </div>
+          <textarea name="message" rows="2" required
+                    placeholder="Что пропустил ИИ? Опишите замечание."></textarea>
+          <button class="btn btn-primary btn-sm" type="submit">Добавить замечание</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <a class="btn btn-ghost" href="/dashboard">← К кабинету</a>
+</div>
+{% endif %}

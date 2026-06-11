@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Чат с ИИ — NormaCAD AI{% endblock %}
+{% block page_title %}Чат с ИИ{% endblock %}
+{% block topbar_action %}
+<a class="btn btn-ghost btn-sm" href="/check">{{ icon('check', size=16) }} Проверить чертёж</a>
+{% endblock %}
+{% block content %}
+<div class="chat-page">
+  {% if user.org_type in ['bureau', 'enterprise'] %}
+  <div class="alert">{{ icon('shield', size=16) }} Режим локальной обработки
+    ({{ 'бюро' if user.org_type == 'bureau' else 'предприятие' }}): запросы ИИ-чата не уходят в облако.</div>
+  {% endif %}
+
+  <div id="chat-window" class="chat-window">
+    {% include "_chat_messages.html" %}
+  </div>
+
+  <form class="composer" hx-post="/chat/{{ session.id }}" hx-target="#chat-window" hx-swap="innerHTML"
+        hx-on::after-request="this.reset()">
+    <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+    <div class="composer-row">
+      <input type="text" name="question" autocomplete="off" required
+             placeholder="Спросите, как исправить нарушение или уточнить пункт стандарта…">
+      <button class="send-btn" type="submit" aria-label="Отправить">{{ icon('send', size=18) }}</button>
+    </div>
+    <div class="composer-tools">
+      <button type="button" class="chip"
+              onclick="var q=document.querySelector('.composer input[name=question]');q.value='Уточните требования ГОСТ: ';q.focus();">
+        {{ icon('doc', size=14) }} Уточнить ГОСТ
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+  document.body.addEventListener('htmx:afterSwap', function () {
+    var w = document.getElementById('chat-window');
+    if (w) { w.scrollTop = w.scrollHeight; }
+  });
+</script>
+{% endblock %}

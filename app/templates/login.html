@@ -1,0 +1,19 @@
+{% extends "auth_base.html" %}
+{% block title %}Вход — NormaCAD AI{% endblock %}
+{% block content %}
+<div class="auth-card card">
+  <h1>Вход</h1>
+  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+  <form method="post" action="/login">
+    <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+    <label>Email
+      <input type="email" name="email" required autofocus>
+    </label>
+    <label>Пароль
+      <input type="password" name="password" required>
+    </label>
+    <button class="btn btn-primary btn-block" type="submit">Войти</button>
+  </form>
+  <p class="muted small" style="margin-top:16px">Нет аккаунта? <a href="/register">Зарегистрироваться</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}История чатов — NormaCAD AI{% endblock %}
+{% block page_title %}История чатов{% endblock %}
+{% block topbar_action %}
+<a class="btn btn-ghost btn-sm" href="/chat/new">{{ icon('edit', size=16) }} Новый чат</a>
+{% endblock %}
+{% block content %}
+<form method="get" action="/chats" class="search-bar">
+  {{ icon('search', cls='search-ic', size=18) }}
+  <input type="text" name="q" value="{{ q or '' }}" autocomplete="off"
+         placeholder="Поиск по разговорам — заголовок или текст сообщения…">
+  {% if q %}<a class="btn btn-ghost btn-sm" href="/chats">Сбросить</a>{% endif %}
+</form>
+
+{% if sessions %}
+<div class="panel">
+  <ul class="chat-list">
+    {% for s in sessions %}
+    <li>
+      <a class="chat-row" href="/chat/{{ s.id }}">
+        <span class="chat-row-ic">{{ icon('chat', size=18) }}</span>
+        <span class="chat-row-text">
+          <span class="chat-row-title">{{ s.title or 'Новый чат' }}</span>
+          <span class="chat-row-sub">обновлён {{ s.updated_at.strftime('%d.%m.%Y %H:%M') }}</span>
+        </span>
+        {{ icon('arrow-right', cls='chat-row-arrow', size=16) }}
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% elif q %}
+<div class="panel">
+  <div class="empty">
+    <div class="empty-icon">{{ icon('search', size=26) }}</div>
+    <h3>Ничего не найдено</h3>
+    <p>По запросу «{{ q }}» разговоров нет. Попробуйте другой запрос или начните новый чат.</p>
+    <div class="empty-actions">
+      <a class="btn btn-primary" href="/chat/new">{{ icon('edit', size=16) }} Новый чат</a>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="panel">
+  <div class="empty">
+    <div class="empty-icon">{{ icon('clock', size=26) }}</div>
+    <h3>История пуста</h3>
+    <p>Здесь будут сохраняться ваши разговоры с ИИ. Начните новый чат — или загрузите чертёж на проверку.</p>
+    <div class="empty-actions">
+      <a class="btn btn-primary" href="/chat/new">{{ icon('edit', size=16) }} Открыть чат</a>
+      <a class="btn btn-ghost" href="/check">{{ icon('check', size=16) }} Проверить чертёж</a>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

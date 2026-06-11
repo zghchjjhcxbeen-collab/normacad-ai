@@ -1,0 +1,31 @@
+# NormaCAD AI — зависимости (План B: dev на SQLite, без Docker/Redis).
+# Установка: .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+
+# --- Ядро нормоконтроля (Этап 0) ---
+ezdxf>=1.3,<2
+
+# --- Веб-слой (FastAPI SSR + серверные сессии) ---
+fastapi>=0.115
+uvicorn[standard]>=0.30
+jinja2>=3.1
+python-multipart>=0.0.9      # формы/загрузка файлов
+sqlalchemy[asyncio]>=2.0
+aiosqlite>=0.20              # dev-драйвер SQLite (async)
+bcrypt>=4.1                  # хэш паролей напрямую (без passlib)
+alembic>=1.13               # миграции схемы (Этап 1; USE_ALEMBIC=1 в проде)
+httpx>=0.27                 # TestClient + клиент чата
+
+# --- Доп. форматы ---
+pdfplumber>=0.11            # парсинг вектор-PDF (Этап 4); тянет pdfminer.six
+fpdf2>=2.8                  # генерация синтетических тест-PDF (бутстрап)
+# pypdfium2 ставится как зависимость fpdf2 — рендер PDF для растрового тракта (Этап 5)
+# paddleocr                # OCR русского для сканов (Этап 5)
+
+# --- Тесты ---
+pytest>=8
+
+# --- Прод (Этап 6+; раскомментировать при переходе на PostgreSQL+ARQ) ---
+# asyncpg>=0.29             # async-драйвер PostgreSQL
+# arq>=0.26                # очередь воркера
+# redis>=5.0               # сессии/кэш/очередь
+# anthropic>=0.40          # облачный чат/vision (только для обычных юзеров)

@@ -1,0 +1,23 @@
+{% from "_icons.html" import icon %}
+{% if messages %}
+  {% for m in messages %}
+  <div class="msg msg-{{ m.role }}">
+    <div class="msg-role">{{ 'Вы' if m.role == 'user' else 'ИИ-помощник' }}</div>
+    <div class="msg-body">{{ m.content }}</div>
+    {% if m.citations %}
+    <div class="msg-cites">
+      {% for c in m.citations %}
+      <a class="cite" href="/gost/{{ c.code.replace('ГОСТ ', '') }}" target="_blank">{{ c.code }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="chat-hero">
+    <div class="empty-icon">{{ icon('chat', size=26) }}</div>
+    <h2>Чат-помощник по ГОСТ</h2>
+    <p>Задайте вопрос по оформлению чертежа или нормам ЕСКД — отвечу со ссылкой на пункт
+      стандарта из базы. Например: «какая минимальная высота чертёжного шрифта?»</p>
+  </div>
+{% endif %}

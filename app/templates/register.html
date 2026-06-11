@@ -1,0 +1,28 @@
+{% extends "auth_base.html" %}
+{% block title %}Регистрация — NormaCAD AI{% endblock %}
+{% block content %}
+<div class="auth-card card">
+  <h1>Регистрация</h1>
+  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+  <form method="post" action="/register">
+    <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+    <label>Email
+      <input type="email" name="email" required autofocus>
+    </label>
+    <label>Пароль <span class="muted">(не короче 8 символов)</span>
+      <input type="password" name="password" required minlength="8">
+    </label>
+    <label>Тип пользователя
+      <select name="org_type">
+        <option value="individual">Частный пользователь — ИИ-чат через облако</option>
+        <option value="bureau">Конструкторское бюро — только локально, без облака</option>
+        <option value="enterprise">Предприятие — только локально, без облака</option>
+      </select>
+    </label>
+    <p class="muted small">Для бюро и предприятий запросы ИИ-чата не покидают локальный
+      контур (требования к режимным/секретным данным).</p>
+    <button class="btn btn-primary btn-block" type="submit">Создать аккаунт</button>
+  </form>
+  <p class="muted small" style="margin-top:16px">Уже есть аккаунт? <a href="/login">Войти</a></p>
+</div>
+{% endblock %}

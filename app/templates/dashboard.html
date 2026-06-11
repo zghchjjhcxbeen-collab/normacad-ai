@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Главная — NormaCAD AI{% endblock %}
+{% block page_title %}Главная{% endblock %}
+{% block topbar_action %}
+<a class="btn btn-ghost btn-sm" href="/check">{{ icon('check', size=16) }} Проверить чертёж</a>
+{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Добро пожаловать, {{ user.email.split('@')[0] | capitalize }}</h1>
+  <p>Загрузите свой первый чертёж, чтобы NormaCAD AI проверил его на соответствие ГОСТ и ЕСКД.</p>
+</div>
+
+{% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+
+<div class="quick-grid">
+  <a class="quick-card" href="/check">
+    <div class="qc-icon green">{{ icon('check') }}</div>
+    <div class="qc-title">Проверить чертёж</div>
+    <div class="qc-desc">Загрузите PDF, DXF или DWG — ИИ найдёт нарушения и выдаст отчёт.</div>
+  </a>
+  <a class="quick-card" href="/chat">
+    <div class="qc-icon blue">{{ icon('chat') }}</div>
+    <div class="qc-title">Чат с ИИ</div>
+    <div class="qc-desc">ИИ объяснит, как исправить найденные нарушения в оформлении.</div>
+  </a>
+  <a class="quick-card" href="/chats">
+    <div class="qc-icon cyan">{{ icon('clock') }}</div>
+    <div class="qc-title">История чатов</div>
+    <div class="qc-desc">Вернитесь к прошлому разговору и продолжите с того же места.</div>
+  </a>
+</div>
+
+<div class="panel">
+  {% if rows %}
+  <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+    <h3 style="margin:0">Ваши проверки</h3>
+    <a class="btn btn-primary btn-sm" href="/check">{{ icon('upload', size=16) }} Загрузить</a>
+  </div>
+  <table class="data-table">
+    <thead><tr><th>#</th><th>Файл</th><th>Статус</th><th></th></tr></thead>
+    <tbody>
+      {% for job, drawing in rows %}
+      <tr>
+        <td class="muted">{{ job.id }}</td>
+        <td>{{ drawing.original_name }}</td>
+        <td><span class="status status-{{ job.status }}">{{ job.status }}</span></td>
+        <td><a class="btn btn-ghost btn-sm" href="/jobs/{{ job.id }}">Открыть</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">
+    <div class="empty-icon">{{ icon('folder', size=26) }}</div>
+    <h3>Здесь пока пусто</h3>
+    <p>Загрузите первый чертёж — после проверки он появится в этом списке вместе с отчётом.</p>
+    <div class="empty-actions">
+      <a class="btn btn-primary" href="/check">{{ icon('upload', size=16) }} Проверить чертёж</a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<div class="section-label">Аккаунт</div>
+<div class="quick-grid">
+  <div class="quick-card">
+    <div class="qc-icon blue">{{ icon('user') }}</div>
+    <div class="qc-title">Профиль</div>
+    <div class="qc-desc">{{ user.email }}</div>
+  </div>
+  <a class="quick-card" href="/chat">
+    <div class="qc-icon">{{ icon('mail') }}</div>
+    <div class="qc-title">Поддержка</div>
+    <div class="qc-desc">Спросите ИИ-помощника по нормам ЕСКД и оформлению.</div>
+  </a>
+  <div class="quick-card">
+    <div class="qc-icon gray">{{ icon('settings') }}</div>
+    <div class="qc-title">Тип доступа</div>
+    <div class="qc-desc">{{ {'individual':'Частный пользователь — облачный ИИ','bureau':'Бюро — локальная обработка','enterprise':'Предприятие — локальная обработка'}.get(user.org_type, 'Пользователь') }}</div>
+  </div>
+</div>
+{% endblock %}

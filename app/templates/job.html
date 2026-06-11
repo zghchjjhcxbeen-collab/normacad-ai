@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Проверка #{{ job.id }} — NormaCAD AI{% endblock %}
+{% block page_title %}Проверка #{{ job.id }}{% endblock %}
+{% block topbar_action %}
+<a class="btn btn-ghost btn-sm" href="/check">{{ icon('upload', size=16) }} Новый чертёж</a>
+{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="/dashboard">← Главная</a></div>
+<h1>Проверка #{{ job.id }}</h1>
+<p class="muted">Файл: {{ drawing.original_name }}</p>
+
+<div id="job-view"
+     hx-get="/jobs/{{ job.id }}/fragment"
+     hx-trigger="load, every 2s"
+     hx-swap="outerHTML"
+     class="card">
+  <p class="muted">Загрузка статуса…</p>
+</div>
+{% endblock %}
