@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Макет окна NormaCAD.PRO для КОМПАС-3D (#47)</title>
+<style>
+:root{
+  --control:#F0F0F0; --window:#FFFFFF; --text:#000000; --gray:#6D6D6D;
+  --hl:#0078D7; --btn-border:#ADADAD; --link:#0066CC;
+  --crit:#C42B1C; --warn:#9D5D00; --ok:#0F7B0F;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"Segoe UI",Tahoma,sans-serif;font-size:12px;color:var(--text);background:#DCDCDC;padding:24px}
+body.only{background:#FFFFFF;padding:16px}
+h1{font-size:16px;margin:0 0 6px}
+.legend{max-width:1100px;margin-bottom:20px;line-height:1.5}
+.legend p{margin:0 0 6px}
+.legend ul{margin:0 0 6px;padding-left:20px}
+.grid{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.item{display:block}
+.cap{font-weight:600;margin:0 0 6px;font-size:12px}
+.cap small{font-weight:400;color:var(--gray)}
+body.only .cap{display:none}
+body.only .item.hide{display:none}
+
+/* окно */
+.win{background:var(--control);border:1px solid #7A7A7A;box-shadow:0 6px 18px rgba(0,0,0,.25);width:522px}
+.win.login{width:362px}
+.title{height:30px;background:#FFFFFF;display:flex;align-items:center;justify-content:space-between;padding-left:10px;font-size:12px}
+.title .btns{display:flex}
+.title .b{width:46px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#000}
+.client{width:520px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.client.main{height:600px}
+.client.main>*{flex:none}
+.client.main>.res{flex:1 1 auto;min-height:0}
+.win.login .client{width:360px;height:300px;padding:14px 16px;gap:0}
+.win.proxy{width:362px}
+.win.proxy .client{width:360px;height:246px;padding:14px 16px;gap:0}
+
+/* контролы */
+.lbl{color:var(--text)}
+.gray{color:var(--gray)}
+.bold{font-weight:700}
+.lnk{color:var(--link);text-decoration:underline;cursor:default}
+.small{font-size:11px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-width:88px;height:26px;padding:0 12px;background:#E1E1E1;border:1px solid var(--btn-border);color:#000;white-space:nowrap}
+.btn.def{border:2px solid var(--hl);padding:0 11px}
+.btn.dis{color:#A0A0A0;background:#CCCCCC;border-color:#BFBFBF}
+.tb{height:23px;background:#fff;border:1px solid #7A7A7A;padding:3px 4px;line-height:15px;overflow:hidden;white-space:nowrap}
+.cb{display:inline-flex;align-items:center;height:23px;background:#fff;border:1px solid #7A7A7A;padding:0 0 0 5px;justify-content:space-between;flex:none}
+.cb::after{content:"";width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #000;margin:0 8px 0 6px}
+.chk{display:inline-flex;align-items:center;gap:6px;height:20px}
+.chk i{display:inline-block;width:13px;height:13px;border:1px solid #333;background:#fff}
+.pb{height:8px;background:#E6E6E6;border:1px solid #BCBCBC}
+.pb div{height:100%;background:#06B025}
+.row{display:flex;align-items:center;gap:8px}
+.row.sp{justify-content:space-between}
+
+/* панель аккаунта */
+.acc{background:#fff;border:1px solid #D0D0D0;padding:5px 8px;display:flex;flex-direction:column;gap:2px}
+.acc .r{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.acc .meta{display:flex;gap:16px;flex-wrap:wrap}
+.file{overflow-wrap:anywhere}
+.status{color:var(--gray);line-height:16px;min-height:16px}
+.foot{display:flex;flex-direction:column;gap:4px}
+.disc{color:var(--gray);line-height:1.35}
+
+/* область результатов */
+.res{background:#fff;border:1px solid var(--btn-border);padding:8px;overflow:hidden;display:flex;flex-direction:column}
+.res.center{align-items:center;justify-content:center;text-align:center;gap:12px}
+.res.center .msg{max-width:380px;line-height:1.4}
+.res.rep{gap:6px}
+
+/* GroupBox */
+.grp{border:1px solid #D0D0D0;padding:12px 10px 8px;position:relative;margin-top:12px}
+.res>.grp:first-child{margin-top:10px}
+.grp .gt{position:absolute;top:-9px;left:8px;background:#fff;padding:0 3px;line-height:16px}
+.grp ul{margin:3px 0;padding-left:18px}
+.grp li{margin:1px 0;line-height:16px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:1px 10px;line-height:16px}
+.kv span:nth-child(odd){color:var(--gray)}
+
+/* этапы сервера */
+.stages{display:grid;grid-template-columns:1fr auto;gap:3px 12px;margin:0 0 6px}
+.stages div{line-height:15px}
+.stages .ss{text-align:right}
+.stages .done.ss{color:var(--ok)}
+.stages .run{font-weight:700}
+.stages .run.ss{color:var(--hl)}
+.stages .wait{color:var(--gray)}
+.info{display:flex;flex-direction:column;gap:0;line-height:16px}
+.note{border-top:1px solid #E0E0E0;padding-top:8px;color:var(--gray);line-height:1.4;margin-top:auto}
+
+/* отчёт */
+.verdict{font-weight:700;font-size:13px;line-height:18px}
+.filters{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.filters .f{display:flex;align-items:center;gap:6px}
+.filters .cnt{margin-left:auto}
+.cardswrap{display:flex;flex:1 1 auto;min-height:0}
+.cards{display:flex;flex-direction:column;gap:6px;overflow:hidden;flex:1;min-width:0;padding-right:6px}
+.card{display:flex;background:#fff;border:1px solid #D0D0D0;flex:none}
+.card .bar{width:5px;flex:none}
+.card .body{padding:5px 8px 6px;display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.card .h{display:flex;flex-wrap:wrap;gap:0 10px;font-weight:700;line-height:16px}
+.card .src{font-weight:400;color:var(--gray)}
+.card .t,.card .d,.card .fix{line-height:1.35;overflow-wrap:anywhere}
+.card .g{color:var(--gray);overflow-wrap:anywhere}
+.card .li{padding-left:12px;text-indent:-12px}
+.card .lk{align-self:flex-start}
+.crit .bar{background:var(--crit)} .crit .sev{color:var(--crit)}
+.warn .bar{background:var(--warn)} .warn .sev{color:var(--warn)}
+.okc .bar{background:var(--ok)} .okc .sev{color:var(--ok)}
+/* полоса прокрутки */
+.sb{width:17px;flex:none;background:#F0F0F0;display:flex;flex-direction:column}
+.sb .ar{height:17px;flex:none;position:relative}
+.sb .ar::after{content:"";position:absolute;left:4px;border-left:4px solid transparent;border-right:4px solid transparent}
+.sb .up::after{top:6px;border-bottom:5px solid #606060}
+.sb .dn::after{top:6px;border-top:5px solid #606060}
+.sb .tr{flex:1;position:relative}
+.sb .th{position:absolute;left:0;right:0;top:0;height:45%;background:#C2C2C2}
+
+.zoomw{zoom:1.5}
+</style>
+</head>
+<body>
+<div class="legend" id="legend">
+  <h1>NormaCAD.PRO для КОМПАС-3D: макет окна, задача #47</h1>
+  <p>Макет на согласование. Окно собирается штатными контролами WinForms .NET 4 без сторонних библиотек: Label, LinkLabel, Button, TextBox, ComboBox, CheckBox, ProgressBar, GroupBox, Panel, FlowLayoutPanel, TableLayoutPanel. Тексты замечаний и обозначения в макете примерные.</p>
+  <p>Главное окно 520×600 (сейчас 640): при масштабе 150% на экране 1920×1080 окно целиком помещается над панелью задач. На меньшем экране окно ужимается по рабочей области, а списки прокручиваются. Раскладка — TableLayoutPanel и FlowLayoutPanel с AutoSize, без абсолютных координат. Поток окна объявляется DPI-aware (SetThreadDpiAwarenessContext), иначе при 150% Windows растягивает окно картинкой и текст размывается.</p>
+  <p>Ход проверки и очередь — поля ответа GET /api/drawings/jobs/{id}: stages, queue_ahead, eta_seconds, heavy_load, pages_done и pages_total. Названия этапов и фразы — как на странице проверки сайта. Отменить идущую проверку сервер не умеет, поэтому кнопки «Отменить» нет. Аккаунт и лимит — поля GET /api/users/me/access: plan_label, access_until, remaining, checks_limit, window_hours, reset_at.</p>
+  <p>Карточка отчёта — Panel с цветной полосой (Panel, Dock = Left) во FlowLayoutPanel с прокруткой. Поля карточки — те же, что в отчёте сервера: severity, page, title, standard, detail, fixes. Источник «ПК» — замечания по основной надписи без ИИ (#45). «Пояснение» показывает и скрывает detail. «Проверить снова» заново выгружает активный документ с текущими правками: это новая проверка, она учитывается в лимите.</p>
+  <p>Кнопки сбоев (фразы — как в коде расширения по #46, тексты лимита — как присылает сервер):</p>
+  <ul>
+    <li>«Повторить» — новая попытка;</li>
+    <li>«Настройки прокси» — окно расширения: адрес, логин и пароль прокси (пароль под DPAPI), пусто — системный прокси; там же ссылка «Настройки прокси Windows»;</li>
+    <li>«Изменить адрес сервера» — окно входа с полем «Сервер»;</li>
+    <li>«Связаться с командой» — страница «Контакты» на сайте;</li>
+    <li>«Получить результат» — повторный опрос задания;</li>
+    <li>«Скачать новую версию» — адрес из ответа сервера (KOMPAS_DOWNLOAD_URL), без него — сайт.</li>
+  </ul>
+  <p>Вход истёк или закрыт на сайте (ответ 401) — сразу окно входа (состояние 1).</p>
+  <p>«Журнал для поддержки» открывает папку с журналом; пароли и токены туда не пишутся. Параметр <code>?only=&lt;имя&gt;</code> показывает одну рамку.</p>
+</div>
+<div class="grid" id="grid"></div>
+
+<script>
+(function(){
+  var ST_TITLE = "NormaCAD.PRO — проверка перед нормоконтролем";
+  var FILE = "Корпус.cdw — чертёж, 2 листа (А3, А4)";
+  var LOGJ = '<a class="lnk gray small" style="color:#6D6D6D">Журнал для поддержки</a>';
+
+  function chrome(title, inner, cls){
+    var isDlg = (cls === 'login' || cls === 'proxy');
+    var b = isDlg ? '<span class="b">&#215;</span>'
+                  : '<span class="b">&#8211;</span><span class="b">&#215;</span>';
+    return '<div class="win '+(cls||'')+'"><div class="title"><span>'+title+'</span><span class="btns">'+b+'</span></div>'+
+           '<div class="client'+(isDlg?'':' main')+'">'+inner+'</div></div>';
+  }
+
+  /* окно настроек прокси: FixedDialog, как ProxyForm в CheckForm.cs */
+  function proxyDlg(){
+    var h = '';
+    h += '<div class="lbl" style="margin-bottom:3px">Адрес прокси (пусто — системный):</div>';
+    h += '<div class="tb" style="width:100%"></div>';
+    h += '<div class="lbl" style="margin:8px 0 3px">Логин:</div>';
+    h += '<div class="tb" style="width:100%"></div>';
+    h += '<div class="lbl" style="margin:8px 0 3px">Пароль:</div>';
+    h += '<div class="tb" style="width:100%"></div>';
+    h += '<div style="margin-top:10px"><a class="lnk">Настройки прокси Windows</a></div>';
+    h += '<div class="row" style="justify-content:flex-end;margin-top:auto"><span class="btn def">OK</span><span class="btn">Отмена</span></div>';
+    return chrome("Настройки прокси", h, 'proxy');
+  }
+
+  /* окно входа: FixedDialog, только закрыть */
+  function login(err){
+    var h = '';
+    h += '<div class="lbl" style="margin-bottom:3px">Электронная почта:</div>';
+    h += '<div class="tb" style="width:100%">inzhener@example.ru</div>';
+    h += '<div class="lbl" style="margin:8px 0 3px">Пароль:</div>';
+    h += '<div class="tb" style="width:100%">'+(err?'&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;':'')+'</div>';
+    h += '<div class="lbl" style="margin:8px 0 3px">Сервер:</div>';
+    h += '<div class="tb" style="width:100%">https://normacad.pro</div>';
+    h += '<div style="min-height:32px;margin-top:6px;line-height:16px;color:'+(err?'var(--crit)':'var(--gray)')+'">'+
+         (err?'Неверный email или пароль. Если доступа ещё нет — запросите приглашение (ссылка «Доступ по запросу»).':'Вход больше не действует. Войдите снова.')+'</div>';
+    h += '<div class="row sp" style="margin-top:6px"><a class="lnk">Забыли пароль?</a><a class="lnk">Доступ по запросу</a></div>';
+    h += '<div class="row" style="justify-content:flex-end;margin-top:auto"><span class="btn def">Войти</span><span class="btn">Отмена</span></div>';
+    return chrome("NormaCAD.PRO — вход", h, 'login');
+  }
+
+  function account(left, meta){
+    return '<div class="acc"><div class="r"><span>inzhener@example.ru</span><a class="lnk">Выйти</a></div>'+
+      '<div class="meta gray">'+(meta || '<span>Тестовый доступ до 18.11.2026</span><span>Осталось '+left+' из 10 проверок за 5 ч</span>')+'</div></div>';
+  }
+
+  /* o: status, pct, btn, dis, left, link, meta */
+  function main(o, res){
+    var h = account(o.left === undefined ? 7 : o.left, o.meta);
+    h += '<div class="bold file">'+FILE+'</div>';
+    h += '<div class="row"><span class="lbl">Область проверки:</span><span class="cb" style="width:230px"><span>ЕСКД — машиностроение</span></span><span style="flex:1"></span>'+
+         '<span class="btn'+(o.dis?' dis':' def')+'">'+(o.btn||'Проверить')+'</span></div>';
+    h += '<div class="status">'+o.status+'</div>';
+    h += '<div class="pb"><div style="width:'+(o.pct||0)+'%"></div></div>';
+    h += res;
+    h += '<div class="foot"><div class="row sp"><span>'+(o.link?'<a class="lnk">Открыть отчёт на сайте</a>':'')+'</span>'+
+         '<span class="chk"><i></i>Поверх окон</span></div>'+
+         '<div class="disc">Предварительная проверка ИИ. Не заменяет нормоконтролёра.</div></div>';
+    return chrome(ST_TITLE, h);
+  }
+
+  /* этапы сервера: [название, состояние, вид done|run|wait] */
+  function stages(rows){
+    var h = '<div class="stages">';
+    rows.forEach(function(s){
+      h += '<div class="'+s[2]+'">'+s[0]+'</div><div class="ss '+s[2]+'">'+s[1]+'</div>';
+    });
+    return h + '</div>';
+  }
+
+  function fail(msg, btn){
+    return '<div class="res center"><div class="msg">'+msg+'</div><span class="btn">'+btn+'</span><div style="margin-top:8px">'+LOGJ+'</div></div>';
+  }
+  function failState(msg, btn, o){
+    o = o || {};
+    return main({status:o.status || 'Проверка не отправлена.', pct:o.pct||0, left:o.left, dis:o.dis, meta:o.meta}, fail(msg, btn));
+  }
+
+  function account_state(){
+    return main({status:'Готово к проверке.'},
+      '<div class="res"><div class="gray" style="line-height:1.4">Нажмите «Проверить»: замечания по основной надписи появятся сразу, отчёт сервера — после проверки.</div></div>');
+  }
+
+  function local(){
+    var r = '<div class="res">';
+    r += '<div class="grp"><span class="gt">Проверено на ПК, без ИИ</span>';
+    r += '<div class="kv"><span>Тип документа:</span><span>Чертёж детали</span><span>Обозначение:</span><span>АБВГ.301122.005</span><span>Форматы:</span><span>лист 1 — А3, лист 2 — А4</span></div>';
+    r += '<div class="bold" style="margin-top:6px;line-height:16px">Замечания по основной надписи: 3</div><ul>'+
+         '<li>Лист 1: не заполнена графа «Масса».</li>'+
+         '<li>Лист 1: в графе «Листов» указано 1, а листов в документе 2.</li>'+
+         '<li>Лист 2: обозначение отличается от листа 1.</li></ul></div>';
+    r += '<div class="grp"><span class="gt">Проверка на сервере</span>';
+    r += stages([
+      ['Приём файла','готово','done'],
+      ['Нормализация формата','ждёт','wait'],
+      ['Поиск по базе ГОСТ','ждёт','wait'],
+      ['Анализ чертежа моделью','ждёт','wait'],
+      ['Проверка достоверности','ждёт','wait']
+    ]);
+    r += '<div class="info"><span>Вы в очереди: перед вами 1 проверка</span><span>Примерно через 3 мин</span><span class="gray">Сейчас серверы нагружены, проверка займёт больше обычного</span></div>';
+    r += '</div></div>';
+    return main({status:'Основная надпись проверена на ПК. Чертёж отправлен на сервер.', pct:10, dis:true}, r);
+  }
+
+  function progress(){
+    var r = '<div class="res">';
+    r += '<div class="row" style="line-height:16px"><span>На ПК: 3 замечания по основной надписи.</span><a class="lnk">Показать</a></div>';
+    r += '<div class="grp"><span class="gt">Проверка на сервере</span>';
+    r += stages([
+      ['Приём файла','готово','done'],
+      ['Нормализация формата','готово','done'],
+      ['Поиск по базе ГОСТ','готово','done'],
+      ['Анализ чертежа моделью: страница 1 из 2','идёт, около 1 мин','run'],
+      ['Проверка достоверности','ждёт','wait']
+    ]);
+    r += '<div class="info"><span>Проверка идёт. Осталось примерно 2 мин.</span><span class="gray">Время примерное: оно зависит от нагрузки и от самих чертежей.</span></div>';
+    r += '</div>';
+    r += '<div style="flex:1;min-height:8px"></div>';
+    r += '<div class="note">Окно можно закрыть: проверка продолжится на сервере. Отчёт откроется здесь при следующем запуске и сохранится в истории на сайте.</div>';
+    r += '</div>';
+    return main({status:'Идёт проверка на сервере.', pct:60, dis:true}, r);
+  }
+
+  /* o: detail, fix, fixes[], link */
+  function card(cls, sev, sheet, src, title, norm, o){
+    var h = '<div class="card '+cls+'"><div class="bar"></div><div class="body">';
+    h += '<div class="h"><span class="sev">'+sev+'</span><span>Лист '+sheet+'</span><span class="src">'+src+'</span></div>';
+    h += '<div class="t">'+title+'</div><div class="g">'+norm+'</div>';
+    if(o.detail){ h += '<div class="d">'+o.detail+'</div>'; }
+    if(o.fix){ h += '<div class="fix"><b>Как исправить:</b> '+o.fix+'</div>'; }
+    if(o.fixes){
+      h += '<div class="fix"><b>Способы исправить:</b>';
+      o.fixes.forEach(function(f){ h += '<div class="li">&#8226; '+f+'</div>'; });
+      h += '</div>';
+    }
+    if(o.link){ h += '<a class="lnk lk">'+o.link+'</a>'; }
+    return h + '</div></div>';
+  }
+  function scrollbar(){
+    return '<div class="sb"><div class="ar up"></div><div class="tr"><div class="th"></div></div><div class="ar dn"></div></div>';
+  }
+
+  function report(){
+    var r = '<div class="res rep">';
+    r += '<div class="verdict">Требует доработки. Критических: 1, замечаний: 4, в норме: 1.</div>';
+    r += '<div class="filters">'+
+         '<span class="f"><span class="lbl">Важность:</span><span class="cb" style="width:84px"><span>все</span></span></span>'+
+         '<span class="f"><span class="lbl">Лист:</span><span class="cb" style="width:46px"><span>все</span></span></span>'+
+         '<span class="f"><span class="lbl">Источник:</span><span class="cb" style="width:66px"><span>все</span></span></span>'+
+         '<span class="gray cnt">Показано: 6 из 6</span></div>';
+    r += '<div class="cardswrap"><div class="cards">';
+    r += card('crit','Критическое','1','сервер','Не проставлен размер, определяющий положение отверстия Ø8.','ГОСТ 2.307-2011',
+      {detail:'Положение отверстия на главном виде не определено: деталь нельзя изготовить по чертежу.',
+       fixes:['проставьте размер от базовой поверхности до оси отверстия;','задайте координаты оси отверстия от двух баз.'],
+       link:'Скрыть пояснение'});
+    r += card('warn','Замечание','1','ПК','Не заполнена графа «Масса».','ГОСТ 2.104-2006, графа 5',
+      {fix:'укажите массу детали в килограммах, без единицы измерения.', link:'Пояснение'});
+    r += card('warn','Замечание','1','ПК','В графе «Листов» указано 1, а листов в документе 2.','ГОСТ 2.104-2006, графа 8',
+      {fix:'укажите 2.', link:'Пояснение'});
+    r += card('warn','Замечание','2','ПК','Обозначение отличается от листа 1.','ГОСТ 2.104-2006, графа 2',
+      {fix:'укажите АБВГ.301122.005, как на листе 1.'});
+    r += card('warn','Замечание','2','сервер','Технические требования размещены не над основной надписью.','ГОСТ 2.316-2008',
+      {fixes:['перенесите текст над основной надписью;','при нехватке места расположите его колонкой левее основной надписи.']});
+    r += card('okc','В норме','1','сервер','Формат и рамка листа соответствуют требованиям.','ГОСТ 2.301-68', {});
+    r += '</div>'+scrollbar()+'</div></div>';
+    return main({status:'Проверка завершена.', pct:100, btn:'Проверить снова', link:true}, r);
+  }
+
+  var items = [
+    ['login','1','login — при запуске вход проверен и больше не действует',login(false)],
+    ['login-error','2','login-error — отказ входа',login(true)],
+    ['account','3','account — до проверки',account_state()],
+    ['local','4','local — замечания ПК по штампу',local()],
+    ['progress','5','progress — ход проверки',progress()],
+    ['report','6','report — отчёт карточками',report()],
+    ['no-internet','7','no-internet — нет интернета',failState('Нет подключения к интернету. Проверьте сеть и повторите.','Повторить')],
+    ['server-down','8','server-down — сервер не отвечает',failState('Сервер не отвечает. Повторите позже.','Повторить')],
+    ['timeout','9','timeout — сервер долго не отвечает',failState('Сервер долго не отвечает. Повторите попытку.','Повторить')],
+    ['server-error','10','server-error — сбой на сервере (5xx)',failState('На сервере произошёл сбой. Повторите позже.','Повторить')],
+    ['bad-address','11','bad-address — неверный адрес сервера',failState('Сервер с таким адресом не найден. Проверьте адрес сервера.','Изменить адрес сервера')],
+    ['proxy','12','proxy — прокси не найден',failState('Не удаётся найти прокси-сервер. Проверьте настройки прокси.','Настройки прокси')],
+    ['proxy-auth','13','proxy-auth — прокси требует вход (407)',failState('Прокси требует вход. Укажите имя и пароль прокси в настройках.','Настройки прокси')],
+    ['tls','14','tls — защищённое соединение подменено',failState('Не удалось установить защищённое соединение: возможно, сертификат сайта подменяет антивирус или прокси. Проверьте настройки прокси или отключите проверку HTTPS в антивирусе.','Настройки прокси')],
+    ['proxy-settings','15','proxy-settings — окно «Настройки прокси»',proxyDlg()],
+    ['rate','16','rate — слишком частые запросы (429)',failState('Слишком много запросов. Подождите минуту и повторите.','Повторить')],
+    ['limit','17','limit — лимит проверок исчерпан (текст сервера)',failState('Вы достигли лимита тестовых проверок: 10 за 5 ч. Следующая проверка будет доступна через 2 ч 15 мин. Чтобы продолжить сотрудничество, свяжитесь с командой проекта.','Связаться с командой',{left:0})],
+    ['expired','18','expired — срок доступа истёк',failState('Срок доступа истёк: новые проверки недоступны, история и отчёты на сайте открываются.','Связаться с командой',{meta:'<span>Тестовый доступ истёк 18.10.2026</span>'})],
+    ['interrupted','19','interrupted — обрыв во время проверки',failState('Связь прервалась во время проверки. Разбор продолжается на сервере — окно продолжит, когда связь вернётся.','Получить результат',{status:'Нет связи с сервером.',pct:60,dis:true})],
+    ['outdated','20','outdated — устаревшая версия (426)',failState('Эта версия расширения устарела. Скачайте новую версию.','Скачать новую версию')]
+  ];
+  var html = '';
+  items.forEach(function(it){
+    html += '<div class="item" id="s-'+it[0]+'"><div class="cap">'+it[1]+'. '+it[2]+'</div>'+it[3]+'</div>';
+  });
+  html += '<div class="item" id="s-report-150"><div class="cap">21. report-150 <small>150% (Windows: Масштаб 150%)</small></div><div class="zoomw">'+report()+'</div></div>';
+  html += '<div class="item" id="s-progress-150"><div class="cap">22. progress-150 <small>150% (Windows: Масштаб 150%)</small></div><div class="zoomw">'+progress()+'</div></div>';
+  document.getElementById('grid').innerHTML = html;
+
+  var only = null;
+  try{ only = new URLSearchParams(location.search).get('only'); }catch(e){}
+  if(only){
+    document.body.className = 'only';
+    document.getElementById('legend').style.display = 'none';
+    var all = document.querySelectorAll('.item');
+    for(var i=0;i<all.length;i++){ if(all[i].id !== 's-'+only) all[i].className += ' hide'; }
+  }
+})();
+</script>
+</body>
+</html>
